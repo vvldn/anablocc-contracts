@@ -17,18 +17,11 @@ contract LandOwnership {
         uint8 state;
         string[] ipfsDocs;
     }
+
+    Ownership[] calldata ownerships;
     function compareStrings(string memory a, string memory b) private pure returns (bool) {
         return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
-    }   
-    /*
-    States = 
-        1 = BASE
-        2 = SALE_INITIATED
-        3 = SALE_ACCEPTED
-        4 = TX_INITIATED
-        5 = TX_ACK
-        6 = CLOSED
-    */
+    }
 
     mapping(bytes32 => uint256) pixelToPlotMap;
     mapping(uint256 => bytes32[]) plotToPixelMap;
@@ -92,7 +85,7 @@ contract LandOwnership {
     }
     
     function acknowledgePayment(uint256 ownershipId) public {
-        require(msg.sender == plotToOwnershipMap[ownershipId].owner, 'E6');
+        require(msg.sender == plotToOwnershipMap[ownershipId].owner || msg.sender == admin, 'E6');
         require(plotToOwnershipMap[ownershipId].state == TX_INITIATED);
         plotToOwnershipMap[ownershipId].state = TX_ACKNOWLEDGED;
     }
@@ -117,5 +110,27 @@ contract LandOwnership {
         plotToOwnershipMap[ownershipId].buyer = address(0);
         delete plotToOwnershipMap[ownershipId].ipfsDocs;
         plotToOwnershipMap[ownershipId].state = BASE;
+    }
+
+    function getOwnershipInfo(uint256 ownershipId) view public returns (Ownership memory) {
+        return plotToOwnershipMap[ownershipId];
+    }
+
+    function getPixelHistory(bytes32 pixelHash) view public returns (Ownership[] calldata) {
+        for(uint256 i = 0; i < plotCount; i++) {
+            bool hasPixel = false;
+            uint256 pos = 0;
+            for(uint256 j = 0; j < plotToPixelMap[j].length; j++) {
+                if (plotToPixelMap[i][j] == pixelHash) {
+                    hasPixel = true;
+                    pos = j;
+                    break;
+                }
+            }
+            if (hasPixel) {
+                ownerships.push(plotToOwnershipMap[pos]);
+            }
+        }
+        return ownerships;
     }
 }

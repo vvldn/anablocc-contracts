@@ -18,7 +18,6 @@ contract LandOwnership {
         string[] ipfsDocs;
     }
 
-    Ownership[] calldata ownerships;
     function compareStrings(string memory a, string memory b) private pure returns (bool) {
         return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
@@ -116,7 +115,8 @@ contract LandOwnership {
         return plotToOwnershipMap[ownershipId];
     }
 
-    function getPixelHistory(bytes32 pixelHash) view public returns (Ownership[] calldata) {
+    function getPixelHistory(bytes32 pixelHash) view public returns (Ownership[] memory) {
+        uint256 count = 0;
         for(uint256 i = 0; i < plotCount; i++) {
             bool hasPixel = false;
             uint256 pos = 0;
@@ -128,7 +128,25 @@ contract LandOwnership {
                 }
             }
             if (hasPixel) {
-                ownerships.push(plotToOwnershipMap[pos]);
+                count += 1;
+            }
+        }
+
+        Ownership[] memory ownerships = new Ownership[](count);
+        uint8 posx = 0;
+        for(uint256 i = 0; i < plotCount; i++) {
+            bool hasPixel = false;
+            uint256 pos = 0;
+            for(uint256 j = 0; j < plotToPixelMap[j].length; j++) {
+                if (plotToPixelMap[i][j] == pixelHash) {
+                    hasPixel = true;
+                    pos = j;
+                    break;
+                }
+            }
+            if (hasPixel) {
+                ownerships[posx] = plotToOwnershipMap[pos];
+                posx += 1;
             }
         }
         return ownerships;

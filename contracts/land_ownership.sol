@@ -5,6 +5,7 @@ contract LandOwnership {
     struct Ownership {
         uint256 plotId;
         address owner;
+        address seller;
         string state;
         string[] ipfsDocs;
     }
@@ -14,14 +15,13 @@ contract LandOwnership {
         SALE_INITIATED
         SALE_ACCEPTED
         TX_INITIATED
+        TX_ACK
         TX_DOC_UPLOADED
-        TX_APPROVED
-        DOC_UPLOADED_2? DISCUSS
         CLOSED
     */
 
     mapping(uint256 => uint256) pixelToPlotMap;
-    mapping(uint256 => uint256) plotToPixelMap;
+    mapping(uint256 => uint256[]) plotToPixelMap;
     mapping(uint256 => Ownership) plotToOwnershipMap;
 
 
@@ -31,16 +31,18 @@ contract LandOwnership {
         admin = msg.sender;
     }
 
-    function initiateSale(uint256[] memory pixels) public {
-    }
+    function initiateSale(uint256[] memory pixels) public {}
 
     function acceptSale(address user2) public {}
 
-    function uploadBuyerDocs(string[] memory ipfsUrls) public {}
+    function initiatePayment(uint256 ownershipId) public {}
     
     function acknowledgePayment(uint256 ownershipId) public {}
 
-    function approveDocuments(uint256 ownershipId) public {}
+    function uploadBuyerDocs(string[] memory ipfsUrls) public {}
 
-    function markSale(uint256 ownershipId) public {} // do we need this??
+    function approveDocumentsAndMarkSale(uint256 ownershipId) public {}
+
+    function cancelSale(uint256 ownershipId) public {}
+
 }

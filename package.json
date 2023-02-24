@@ -1,0 +1,24 @@
+{
+  "name": "certapp-crypto",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy_testnet": "npx hardhat compile && npx hardhat run scripts/deploy.js --network maticmum"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "dotenv": "^16.0.1",
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "filereader": "^0.10.3",
+    "pdf-lib": "^1.17.1",
+    "yargs": "^17.5.1"
+  }
+}

@@ -15,6 +15,7 @@ app.use(cors());
 // connect to database
 const connectToDatabase = async () => {
   try {
+    mongoose.set("strictQuery", false);
     await mongoose.connect(config.mongoUri);
     console.log('Connected to mongodb');
   } catch (err) {

@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // connect to database
-const connectToDatabase = async () {
+const connectToDatabase = async () => {
   try {
     await mongoose.connect(config.mongoUri);
     console.log('Connected to mongodb');
@@ -21,6 +21,7 @@ const connectToDatabase = async () {
     console.error(`Failed connecting to mongodb. Err: ${JSON.stringify(err)}`);
   }
 }
+connectToDatabase();
 
 // Routes
 app.get('/', (req, res) => {

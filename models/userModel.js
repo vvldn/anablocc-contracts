@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     trim: true,
+    sparse: true
   },
   otp: {
     type: String,

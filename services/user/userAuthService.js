@@ -1,9 +1,20 @@
 const config = require('../../config/config');
 const userModel = require('../../models/userModel');
 
-const checkAndSignUpUser = async ({ name, email, phone, aadhar }) => {
-    console.log(`Creating new user: ${JSON.stringify(req.body)}`);
-        const newUser = await userModel.create({ name, email, phone, aadhar }, { runValidators: true });
+const checkAndSignUpUser = async (model) => {
+    console.log(`Creating new user: ${JSON.stringify(model)}`);
+    const { email, phone, aadhar } = model;
+    const existingUser = await userModel.findOne({ $or: [{email}, {phone}, {aadhar}] }).lean();
+    if(existingUser){
+        return { success: false, error: 'user exists with these details' };
+    }
+    const response = await userModel.create(model)
+        .then(newUser => ({ success: true, data: newUser }))
+        .catch(err => {
+            throw new Error(`User creation failed. Err: ${JSON.stringify(err)}`)
+        });
+
+    return response;
 }
 
 const checkForUserWithPhoneAndSetOTP = async (phone) => {

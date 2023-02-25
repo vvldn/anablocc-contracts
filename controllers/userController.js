@@ -12,15 +12,15 @@ const userSignUp = async (req, res, next) => {
             res.status(403).json({ success: false, error: 'Missing params. name, email, phone and aadhar are required fields' });
         }
 
-        const response = userAuthService.checkAndSignUpUser({ name, email, phone, aadhar });
+        const response = await userAuthService.checkAndSignUpUser({ name, email, phone, aadhar });
         if(!response.success){
-
+            return res.status(400).json(response);
         }
 
-        return res.status(200).json({ success: true, data: newUser });
+        return res.status(200).json(response);
     } catch (err) {
-        console.error(err)
-        return res.status(500);
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -36,7 +36,8 @@ const checkAndSendOtp = async (req, res, next) => {
 
         return res.status(200).json(response);
     } catch (err) {
-        return next(err);
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -55,7 +56,7 @@ const verifyOtpAndLogin = async (req, res, next) => {
         return res.status(200).json({ success: true, data: { token, user: response.data } });
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -65,7 +66,7 @@ const userLogout = (req, res, next) => {
         return res.status(200).send({ success: true });
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -80,7 +81,7 @@ const getAllPropertiesForUser = async (req, res, next) => {
         return res.status(200).json(response)
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -96,7 +97,7 @@ const getPropertyDetails = async (req, res, next) => {
         return res.status(200).json(response);
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -114,7 +115,7 @@ const initiatePropertySale = async (req, res, next) => {
         return res.status(200).json(response);
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -129,7 +130,7 @@ const getAllActionsForUser = async (req, res, next) => {
         return res.status(200).json(response);
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 

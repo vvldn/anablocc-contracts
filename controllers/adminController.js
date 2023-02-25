@@ -20,7 +20,7 @@ const adminLogin = async (req, res, next) => {
         return res.status(200).json({ success: true, token: token });
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -30,7 +30,7 @@ const adminLogout = (req, res, next) => {
         return res.status(200).send({ success: true });
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -41,7 +41,7 @@ const getAllProperties = async (req, res, next) => {
         return res.status(200).json({ actions: response.data })
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 
@@ -54,7 +54,7 @@ const getAllActions = async (req, res, next) => {
         return res.status(200).json({ actions: response.data })
     } catch (err) {
         console.error(err);
-        return res.status(500);
+        return res.status(500).send('Something went wrong.Try again later.');
     }
 }
 

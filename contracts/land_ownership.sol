@@ -41,7 +41,7 @@ contract LandOwnership {
     function initiateSaleFromAdmin(bytes32[] memory pixels, address buyer) public {
         require(msg.sender == admin, 'E0');
         for(uint8 i = 0; i < pixels.length; i++) {
-            require(pixelToPlotMap[pixels[i]] == 0, 'E');
+            require(pixelToPlotMap[pixels[i]] == 0, 'E4');
             pixelToPlotMap[pixels[i]] = plotCount;
             plotToPixelMap[plotCount].push(pixels[i]);
         }
@@ -54,53 +54,53 @@ contract LandOwnership {
 
     function initiateSale(uint256 ownershipId, address buyer) public {
         require(msg.sender == plotToOwnershipMap[ownershipId].owner, 'E1');
-        require(plotToOwnershipMap[ownershipId].state == BASE);
-        require(plotToOwnershipMap[ownershipId].owner != buyer);
+        require(plotToOwnershipMap[ownershipId].state == BASE, 'E3');
+        require(plotToOwnershipMap[ownershipId].owner != buyer, 'E5');
         plotToOwnershipMap[ownershipId].state = SALE_INITIATED;
         plotToOwnershipMap[ownershipId].buyer = buyer;
         emit InitiateSale(ownershipId);
     }
 
     function acceptSale(uint256 ownershipId) public {
-        require(plotToOwnershipMap[ownershipId].state == SALE_INITIATED, 'E4');
-        require(plotToOwnershipMap[ownershipId].buyer == msg.sender, 'E10');
+        require(plotToOwnershipMap[ownershipId].state == SALE_INITIATED, 'E3');
+        require(plotToOwnershipMap[ownershipId].buyer == msg.sender, 'E2');
         plotToOwnershipMap[ownershipId].state = SALE_ACCEPTED;
     }
     
     function uploadBuyerDocs(string memory ipfsUrl, uint256 ownershipId) public {
-        require(msg.sender == plotToOwnershipMap[ownershipId].buyer, 'E6');
-        require(plotToOwnershipMap[ownershipId].state == SALE_ACCEPTED);
+        require(msg.sender == plotToOwnershipMap[ownershipId].buyer, 'E2');
+        require(plotToOwnershipMap[ownershipId].state == SALE_ACCEPTED, 'E3');
         plotToOwnershipMap[ownershipId].ipfsDocs.push(ipfsUrl);
         plotToOwnershipMap[ownershipId].state = DOC_UPLOADED;
     }
     
     function rejectDocs(uint256 ownershipId) public {
-        require(msg.sender == admin);
-        require(plotToOwnershipMap[ownershipId].state == DOC_UPLOADED);
+        require(msg.sender == admin, 'E0');
+        require(plotToOwnershipMap[ownershipId].state == DOC_UPLOADED, 'E3');
         delete plotToOwnershipMap[ownershipId].ipfsDocs;
         plotToOwnershipMap[ownershipId].state = SALE_ACCEPTED;
     }
 
     function approveDocs(uint256 ownershipId)  public {
-        require(msg.sender == admin);
-        require(plotToOwnershipMap[ownershipId].state == DOC_UPLOADED);
+        require(msg.sender == admin, 'E0');
+        require(plotToOwnershipMap[ownershipId].state == DOC_UPLOADED, 'E3');
         plotToOwnershipMap[ownershipId].state = DOC_APPROVED;
     }
 
     function initiatePayment(uint256 ownershipId) public {
-        require(msg.sender == plotToOwnershipMap[ownershipId].buyer, 'E4');
-        require(plotToOwnershipMap[ownershipId].state == DOC_APPROVED, 'E5');
+        require(msg.sender == plotToOwnershipMap[ownershipId].buyer, 'E2');
+        require(plotToOwnershipMap[ownershipId].state == DOC_APPROVED, 'E3');
         plotToOwnershipMap[ownershipId].state = TX_INITIATED;
     }
     
     function acknowledgePayment(uint256 ownershipId) public {
-        require(msg.sender == plotToOwnershipMap[ownershipId].owner || msg.sender == admin, 'E6');
-        require(plotToOwnershipMap[ownershipId].state == TX_INITIATED);
+        require(msg.sender == plotToOwnershipMap[ownershipId].owner || msg.sender == admin, 'E0A');
+        require(plotToOwnershipMap[ownershipId].state == TX_INITIATED, 'E3');
         plotToOwnershipMap[ownershipId].state = TX_ACKNOWLEDGED;
     }
 
     function approveDocumentsAndMarkSale(bytes32[] memory pixels, address buyer) public {
-        require(msg.sender == admin);
+        require(msg.sender == admin, 'E0');
         plotToOwnershipMap[plotCount].owner = buyer;
         plotToOwnershipMap[plotCount].state = BASE;
         plotCount = plotCount + 1;
@@ -108,8 +108,8 @@ contract LandOwnership {
         uint8 posx = 0;
         for(uint8 i = 0; i < pixels.length; i++) {
             bytes32 pixel = pixels[i];
-            require(plotToOwnershipMap[pixelToPlotMap[pixel]].buyer == buyer);
-            require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == TX_ACKNOWLEDGED);
+            require(plotToOwnershipMap[pixelToPlotMap[pixel]].buyer == buyer, 'E2');
+            require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == TX_ACKNOWLEDGED, 'E3');
             plotToPixelMap[plotCount].push(pixel);
             pixelToPlotMap[pixel] = plotCount;
             bool found = false;
@@ -133,7 +133,7 @@ contract LandOwnership {
 
     function cancelSale(uint256 ownershipId) public {
         require(plotToOwnershipMap[ownershipId].state < 4);
-        require((msg.sender == admin) || (msg.sender == plotToOwnershipMap[ownershipId].owner) || (msg.sender == plotToOwnershipMap[ownershipId].buyer));
+        require((msg.sender == admin) || (msg.sender == plotToOwnershipMap[ownershipId].owner) || (msg.sender == plotToOwnershipMap[ownershipId].buyer), 'E0A');
         plotToOwnershipMap[ownershipId].buyer = address(0);
         delete plotToOwnershipMap[ownershipId].ipfsDocs;
         plotToOwnershipMap[ownershipId].state = BASE;

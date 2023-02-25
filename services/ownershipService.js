@@ -6,16 +6,10 @@ const actionsService = require('./actionsService');
 const ownershipModel = require('../models/ownershipModel');
 
 const getOwnershipHistoryWithPixelHash = async (pixelHash) => {
-    try {
-        const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
-        const address = config.contractAddress;
-        const loContract = loContractFactory.attach(address);
-        const result = await loContract.getPixelHistory();
-        return { success: true, data: result };
-    } catch (err) {
-        console.error(err);
-
-    }
+    const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
+    const loContract = loContractFactory.attach(config.contractAddress);
+    const result = await loContract.getPixelHistory(pixelHash);
+    return result;
 }
 
 const getOwnershipDetails = async (ownershipId) => {
@@ -24,7 +18,10 @@ const getOwnershipDetails = async (ownershipId) => {
 }
 
 const getPropertyListDto = (ownerships) => {
-    const propertyList = _.map(ownerships, ownership => ownership.property);
+    const propertyList = _.map(ownerships, ownership => {
+        const { ownerId: owner, status, ownershipId, property } = ownership;
+        return { owner: owner.name, ...property, ownershipId, status };
+    });
 
     return propertyList;
 }
@@ -74,9 +71,9 @@ const getOwnershipHistoryForProperty = async (userId, ownershipId) => {
     const findQuery = { ownerId: userId, ownershipId };
     const ownership = await ownershipModel.findOne(findQuery).populate('ownerId lastOwnerId');
     const pixelHash = ownership.property.pixels[0].hash;
+    
     const historyFromChain = await getOwnershipHistoryWithPixelHash(pixelHash);
-
-    const ownershipHistory = getOwnershipHistoryDto(historyFromChain);
+    const ownershipHistory = getOwnershipHistoryDto(historyFromChain.data);
 
     return { success: true, data: ownershipHistory };
 }
@@ -84,7 +81,7 @@ const getOwnershipHistoryForProperty = async (userId, ownershipId) => {
 const getPropertyListForUserDto = (ownerships) => {
     const propertyList = _.map(ownerships, ownership => {
         const { ownerId: owner, ownershipId, property } = ownership;
-        return { owner: owner.name, property, ownershipId }
+        return { owner: owner.name, ...property, ownershipId };
     });
 
     return propertyList;

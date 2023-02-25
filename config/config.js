@@ -15,6 +15,8 @@ config.jwt = {
     adminSecret: 'adminjstsecret',
 }
 
+config.adminPhone = "9898989898";
+
 config.adminUserId = '63f9dca1b4b02daa53fdb977';
 
 config.ownershipId = '001';

@@ -109,7 +109,7 @@ contract LandOwnership {
         for(uint8 i = 0; i < pixels.length; i++) {
             bytes32 pixel = pixels[i];
             require(plotToOwnershipMap[pixelToPlotMap[pixel]].buyer == buyer, 'E2');
-            require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == TX_ACKNOWLEDGED, 'E3');
+            require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == DOC_APPROVED, 'E3');
             plotToPixelMap[plotCount].push(pixel);
             pixelToPlotMap[pixel] = plotCount;
             bool found = false;

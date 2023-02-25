@@ -145,7 +145,7 @@ contract LandOwnership {
 
     function getPixelHistory(bytes32 pixelHash) view public returns (Ownership[] memory) {
         uint256 count = 0;
-        for(uint256 i = 0; i < plotCount; i++) {
+        for(uint256 i = 1; i <= plotCount ; i++) {
             bool hasPixel = false;
             uint256 pos = 0;
             for(uint256 j = 0; j < plotToPixelMap[j].length; j++) {
@@ -162,7 +162,7 @@ contract LandOwnership {
 
         Ownership[] memory ownerships = new Ownership[](count);
         uint8 posx = 0;
-        for(uint256 i = 0; i < plotCount; i++) {
+        for(uint256 i = 1; i <= plotCount; i++) {
             bool hasPixel = false;
             uint256 pos = 0;
             for(uint256 j = 0; j < plotToPixelMap[j].length; j++) {
@@ -182,12 +182,12 @@ contract LandOwnership {
 
     function getOpenSales() public view returns (Ownership[] memory) {
         uint256 openSaleCount = 0;
-        for(uint256 i = 0; i < plotCount; i++) {
+        for(uint256 i = 1; i <= plotCount; i++) {
             if (plotToOwnershipMap[i].state == SALE_INITIATED) openSaleCount += 1; 
         }
         Ownership[] memory ownerships = new Ownership[](openSaleCount);
         uint256 posx = 0;
-        for(uint256 i = 0; i < plotCount; i++) {
+        for(uint256 i = 1; i <= plotCount; i++) {
             if (plotToOwnershipMap[i].state == SALE_INITIATED) {
                 ownerships[posx] = plotToOwnershipMap[i];
                 posx = posx + 1;

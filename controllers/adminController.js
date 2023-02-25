@@ -3,7 +3,7 @@ const config = require('../config/config');
 
 const adminAuthService = require('../services/admin/adminAuthService');
 const adminPropertiesService = require('../services/admin/adminPropertiesService');
-const adminActionService = require('../services/admin/adminActionsService');
+const ownershipService = require('../services/ownershipService');
 
 const adminLogin = async (req, res, next) => {
     try {
@@ -36,7 +36,8 @@ const adminLogout = (req, res, next) => {
 
 const getAllProperties = async (req, res, next) => {
     try {
-        const response = await adminActionService.getAllActionsForAdmin(state);
+        const { status } = req.params;
+        const response = await ownershipService.getAllPropertiesForAdmin(status);
 
         return res.status(200).json({ actions: response.data })
     } catch (err) {
@@ -47,11 +48,24 @@ const getAllProperties = async (req, res, next) => {
 
 const getAllActions = async (req, res, next) => {
     try {
-        const { state } = req.body;
+        const { status } = req.body;
 
-        const response = await adminActionService.getAllActionsForAdmin(state);
+        const response = await ownershipService.getAllActionsForAdmin(status);
 
         return res.status(200).json({ actions: response.data })
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
+    }
+}
+
+const addPropertyFromAdmin = async (req, res, next) => {
+    try {
+        const model = req.body;
+
+        const response = await adminPropertiesService.addNewProperty(model);
+
+        return res.status(200).json(response);
     } catch (err) {
         console.error(err);
         return res.status(500).send('Something went wrong.Try again later.');
@@ -63,4 +77,5 @@ module.exports = {
     adminLogout,
     getAllProperties,
     getAllActions,
+    addPropertyFromAdmin,
 }

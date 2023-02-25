@@ -9,16 +9,12 @@ const ownershipStatusEnum = {
     CLOSED: 'CLOSED',
 };
 
-const propertyStateEnum = {
-    BASE: 'BASE',
-    SALE_IN_PROGRESS: 'SALE_IN_PROGRESS',
-};
-
 const documentsStatusEnum = {
     VERIFICATION_PENDING: 'VERIFICATION_PENDING',
     VERIFIED: 'VERIFIED'
 }
 
 module.exports = {
-    ownershipStatusEnum, propertyStateEnum, documentsStatusEnum
+    ownershipStatusEnum, 
+    documentsStatusEnum,
 };

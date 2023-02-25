@@ -2,8 +2,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
 const userAuthService = require('../services/user/userAuthService');
-const userActionsService = require('../services/user/userActionsService');
-const userPropertiesService = require('../services/user/userPropertiesService');
+const ownershipService = require('../services/ownershipService');
 
 const userSignUp = async (req, res, next) => {
     try {
@@ -73,7 +72,7 @@ const userLogout = (req, res, next) => {
 const getAllPropertiesForUser = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const response = await userPropertiesService.getAllUserProperties(userId);
+        const response = await ownershipService.getPropertyListForUser(userId);
         if(!response.success){
             return res.status(400).json({ response })
         }
@@ -87,9 +86,9 @@ const getAllPropertiesForUser = async (req, res, next) => {
 
 const getPropertyDetails = async (req, res, next) => {
     try {
-        const { propertyId } = req.params;
+        const { ownershipId } = req.params;
         const userId = req.user.id;
-        const response = await userPropertiesService.getPropertyDetails(userId, propertyId);
+        const response = await ownershipService.getPropertyDetails(userId, ownershipId);
         if(!response.success){
             return res.status(400).json(response);
         }
@@ -103,10 +102,10 @@ const getPropertyDetails = async (req, res, next) => {
 
 const initiatePropertySale = async (req, res, next) => {
     try {
-        const { propertyId, buyerAadhar, buyerName, buyerDob, transactionHash } = req.body;
+        const { ownershipId, buyerAadhar, transactionHash } = req.body;
         const userId = req.user.id;
-        const response = await userPropertiesService.checkAndInitiatePropertySale({
-            userId, propertyId, buyerName, buyerDob, buyerAadhar, transactionHash
+        const response = await ownershipService.checkAndInitiatePropertySale({
+            userId, ownershipId, buyerAadhar, transactionHash
         });
         if(!response.success){
             return res.status(400).json(response);
@@ -122,7 +121,7 @@ const initiatePropertySale = async (req, res, next) => {
 const getAllActionsForUser = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const response = await userActionsService.getUserActions(userId);
+        const response = await ownershipService.getUserActions(userId);
         if(!response.success){
             return res.status(400).json(response);
         }

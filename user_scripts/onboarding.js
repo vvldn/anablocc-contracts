@@ -1,8 +1,11 @@
 const crypto = require("crypto");
 const _ = require("underscore");
 const hre = require("hardhat");
-const fs = require("fs");
 
+const userModel = require('../models/userModel');
+const ownershipModel = require('../models/ownershipModel');
+const { ownershipStatusEnum } = require("../enums");
+const config = require('../config/config');
 
 const getCoordinateHash = (lat, lng) => {
   return crypto
@@ -132,6 +135,30 @@ async function initiateSale(plot, user) {
     });
 }
 
+const users = [
+  {
+    name: 'Vighnesh',
+    walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb7',
+    aadhar: '1234123412341234',
+    email: 'abcd@gmail.com',
+    phone: '9999888800',
+  },
+  {
+    name: 'Kartikey',
+    walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b0',
+    aadhar: '1234123412341235',
+    email: 'abce@gmail.com',
+    phone: '9999888801',
+  },
+  {
+    name: 'Vishal',
+    walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaEf',
+    aadhar: '1234123412341236',
+    email: 'abce@gmail.com',
+    phone: '9999888802',
+  }
+]
+
 async function startMigration() {
     const widthX = 0.00009
     const widthY = 0.0001
@@ -140,35 +167,32 @@ async function startMigration() {
       y: 77.651972,
     };
     const plots = generateGrid(origin, widthX, widthY);
-    const user1 = {
-        name: 'Vighnesh',
-        walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb7',
-        aadhar: '1234123412341234',
-        email: 'abcd@gmail.com',
-        phone: '9999888800',
-    };
-    const user2 = {
-        name: 'Kartikey',
-        walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b0',
-        aadhar: '1234123412341235',
-        email: 'abce@gmail.com',
-        phone: '9999888801',
-    };
-    const user3 = {
-        name: 'Vishal',
-        walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaEf',
-        aadhar: '1234123412341236',
-        email: 'abce@gmail.com',
-        phone: '9999888802',
-    };
 
-    // createUsers();
-    const hash = await initiateSale(plots[2], user1);
+    const newUsers = await Promise.all(_.map(users, user => userModel.create(user)));
+    const user = newUsers[1];
+    const hash = await initiateSale(plots[3], user);
     const { hash: transactionHash, ownershipId } = hash;
 
-    // backend.registerActions();
-    console.log(JSON.stringify({transactionHash, ownershipId}));
+    const ownership = await ownershipModel.create({
+      ownerId: config.adminUserId,
+      buyerId: user._id,
+      ownershipId,
+      transactions: [ {hash: transactionHash, status: ownershipStatusEnum.SALE_INITIATED} ],
+      property: {
+        mapLayout: plots[3].layout,
+        pixels: plots[3].pixels,
+        address: {
+          line: '619, 1st main road',
+          locality: 'HSR Layout',
+          city: 'HSR Layout',
+          pincode: '560102',
+          state: 'Karnataka'
+        }
+      }
+    })
 
+    // backend.registerActions();
+    console.log(JSON.stringify(ownership));
 }
 
 startMigration();

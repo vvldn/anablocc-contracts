@@ -154,8 +154,29 @@ const users = [
     name: 'Vishal',
     walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaEf',
     aadhar: '1234123412341236',
-    email: 'abce@gmail.com',
+    email: 'abcf@gmail.com',
     phone: '9999888802',
+  },
+  {
+    name: 'Sahaj',
+    walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb3',
+    aadhar: '1234123412341237',
+    email: 'abcg@gmail.com',
+    phone: '9999888803',
+  },
+  {
+    name: 'Danish',
+    walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b1',
+    aadhar: '1234123412341238',
+    email: 'abch@gmail.com',
+    phone: '9999888804',
+  },
+  {
+    name: 'Abhigya',
+    walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaE2',
+    aadhar: '1234123412341239',
+    email: 'abci@gmail.com',
+    phone: '9999888805',
   }
 ]
 
@@ -169,7 +190,13 @@ async function startMigration() {
     const plots = generateGrid(origin, widthX, widthY);
 
     const newUsers = await Promise.all(_.map(users, user => userModel.create(user)));
+    
+    const hashModels = [];
+    for (let i = 0; i < 6; i++) {
+      
+    }
     const user = newUsers[1];
+
     const hash = await initiateSale(plots[3], user);
     const { hash: transactionHash, ownershipId } = hash;
 

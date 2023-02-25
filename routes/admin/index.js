@@ -6,8 +6,10 @@ router.post('/login', adminController.adminLogin);
 
 router.post('/logout', adminController.adminLogout);
 
-router.post('/properties', adminController.getAllProperties);
+router.get('/properties/:status', adminController.getAllProperties);
 
-router.post('/actions', adminController.getAllActions);
+router.get('/actions/:status', adminController.getAllActions);
+
+router.post('/add-property', adminController.addPropertyFromAdmin);
 
 module.exports = router;

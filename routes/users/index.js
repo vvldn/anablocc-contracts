@@ -11,12 +11,12 @@ router.post('/verify-otp', userController.verifyOtpAndLogin);
 
 router.post('/logout', userController.userLogout);
 
+router.get('/:userId', userController.getUserDetails);
+
 router.post('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
 
 router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser);
 
 router.post('/wallet', userAuthMiddleware, userController.setWalletForUser);
-
-router.get('/:userId', userController.getUserDetails);
 
 module.exports = router;

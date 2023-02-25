@@ -15,4 +15,8 @@ config.jwt = {
     adminSecret: 'adminjstsecret',
 }
 
+config.adminUserId = '63f9dca1b4b02daa53fdb977';
+
+config.ownershipId = '001';
+
 module.exports = config;

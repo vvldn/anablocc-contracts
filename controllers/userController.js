@@ -134,6 +134,17 @@ const getAllActionsForUser = async (req, res, next) => {
     }
 }
 
+const setWalletForUser = async (req, res, next) => {
+    try { 
+        const userId = req.user.id;
+        await userAuthService.setAddressForUser(req.body.address, userId);
+        return res.send(200);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
+    }
+
+}
 module.exports = {
     userSignUp,
     checkAndSendOtp,
@@ -143,4 +154,5 @@ module.exports = {
     getPropertyDetails,
     initiatePropertySale,
     getAllActionsForUser,
+    setWalletForUser,
 }

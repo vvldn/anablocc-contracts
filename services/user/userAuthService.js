@@ -37,8 +37,14 @@ const checkAndLoginUser = async (otp) => {
     return { success: true, data: user };
 }
 
+const setAddressForUser = async (address, userId) => {
+    const user = await userModel.findById(userId);
+    if (user.walletAddress) return;
+    await userModel.findByIdAndUpdate(userId, { walletAddress: address });
+}
 module.exports = {
     checkAndSignUpUser,
     checkForUserWithPhoneAndSetOTP,
     checkAndLoginUser,
+    setAddressForUser,
 }

@@ -8,6 +8,7 @@ const initiatePropertySaleAction = async (model) => {
     if(!buyerId) return { success: false, error: 'buyerId is required' };
     if(!propertyId) return { success: false, error: 'propertyId is required' };
     if(!transactionHash) return { success: false, error: 'transactionHash is required' };
+    
     const transactionModel = { hash:  transactionHash, status: ownershipStatusEnum.SALE_INITIATED };
     const newAction  = actionModel.create({ sellerId, buyerId, propertyId, transactionHashes: [transactionModel] });
 

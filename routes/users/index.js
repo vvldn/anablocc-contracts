@@ -15,4 +15,6 @@ router.post('/properties', userAuthMiddleware, userController.getAllPropertiesFo
 
 router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser);
 
+router.post('/wallet', userAuthMiddleware, userController.setWalletForUser);
+
 module.exports = router;

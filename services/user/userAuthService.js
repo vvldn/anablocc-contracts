@@ -42,9 +42,15 @@ const setAddressForUser = async (address, userId) => {
     if (user.walletAddress) return;
     await userModel.findByIdAndUpdate(userId, { walletAddress: address });
 }
+
+const getUserDetailsByAadhar = async (aadhar) => {
+    const user = await userModel.findOne({ aadhar }).lean();
+    return user;
+}
 module.exports = {
     checkAndSignUpUser,
     checkForUserWithPhoneAndSetOTP,
     checkAndLoginUser,
     setAddressForUser,
+    getUserDetailsByAadhar,
 }

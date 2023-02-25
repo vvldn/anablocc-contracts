@@ -42,12 +42,12 @@ const getPropertyDetails = async (userId, propertyId) => {
 }
 
 const checkAndInitiatePropertySale = async (model) => {
-    const { userId, propertyId, buyerName, buyerDob, buyerAadhar } = model;
+    const { userId, propertyId, buyerName, buyerDob, buyerAadhar, transactionHash } = model;
     if(!propertyId) return { success: false, error: 'propertyId is required' };
     if(!buyerName) return { success: false, error: 'buyerName is required' };
     if(!buyerDob) return { success: false, error: 'buyerDob is required' };
     if(!buyerAadhar) return { success: false, error: 'buyerAadhar is required' };
-    
+    if(!transactionHash) return { success: false, error: 'transactionHash is required' };
     const seller = userModel.findById(userId).lean();
     if(!seller){
         return { success: false, error: 'User not found' };
@@ -71,6 +71,7 @@ const checkAndInitiatePropertySale = async (model) => {
         sellerId: seller._id,
         buyerId: buyer._id,
         propertyId: property._id,
+        transactionHash,
      });
      if(!response.success){
         return response;

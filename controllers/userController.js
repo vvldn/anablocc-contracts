@@ -103,10 +103,10 @@ const getPropertyDetails = async (req, res, next) => {
 
 const initiatePropertySale = async (req, res, next) => {
     try {
-        const { propertyId, buyerAadhar, buyerName, buyerDob } = req.body;
+        const { propertyId, buyerAadhar, buyerName, buyerDob, transactionHash } = req.body;
         const userId = req.user.id;
         const response = await userPropertiesService.checkAndInitiatePropertySale({
-            userId, propertyId, buyerName, buyerDob, buyerAadhar
+            userId, propertyId, buyerName, buyerDob, buyerAadhar, transactionHash
         });
         if(!response.success){
             return res.status(400).json(response);
@@ -138,12 +138,22 @@ const setWalletForUser = async (req, res, next) => {
     try { 
         const userId = req.user.id;
         await userAuthService.setAddressForUser(req.body.address, userId);
-        return res.send(200);
+        return res.status(200).send();
     } catch (err) {
         console.error(err);
         return res.status(500).send('Something went wrong.Try again later.');
     }
+}
 
+const getUserDetails = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+        const result = userActionsService.getUserDetails(userId);
+        return res.status(200).send({ user: result });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
+    }
 }
 module.exports = {
     userSignUp,
@@ -155,4 +165,5 @@ module.exports = {
     initiatePropertySale,
     getAllActionsForUser,
     setWalletForUser,
+    getUserDetails,
 }

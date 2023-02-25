@@ -1,13 +1,15 @@
 const userModel = require('../../models/userModel');
 const actionModel = require('../../models/actionModel');
+const { ownershipStatusEnum } = require('../../enums');
 
 const initiatePropertySaleAction = async (model) => {
-    const { sellerId, buyerId, propertyId } = model;
+    const { sellerId, buyerId, propertyId, transactionHash } = model;
     if(!sellerId) return { success: false, error: 'sellerId is required' };
     if(!buyerId) return { success: false, error: 'buyerId is required' };
     if(!propertyId) return { success: false, error: 'propertyId is required' };
-
-    const newAction  = actionModel.create({ sellerId, buyerId, propertyId });
+    if(!transactionHash) return { success: false, error: 'transactionHash is required' };
+    const transactionModel = { hash:  transactionHash, status: ownershipStatusEnum.SALE_INITIATED };
+    const newAction  = actionModel.create({ sellerId, buyerId, propertyId, transactionHashes: [transactionModel] });
 
     return { success: true, data: newAction };
 }

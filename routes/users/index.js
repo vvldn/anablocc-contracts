@@ -17,4 +17,6 @@ router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser)
 
 router.post('/wallet', userAuthMiddleware, userController.setWalletForUser);
 
+router.get('/:userId', userController.getUserDetails);
+
 module.exports = router;

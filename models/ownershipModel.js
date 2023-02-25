@@ -6,7 +6,6 @@ const ownershipSchema = new mongoose.Schema({
   lastOwner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
   },
   propertyId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,10 +17,18 @@ const ownershipSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  buyerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   status: {
     type: String,
     enum: Object.values(ownershipStatusEnum),
     default: ownershipStatusEnum.BASE,
+  },
+  ownershipId: {
+    type: String,
+    required: true
   }
 });
 

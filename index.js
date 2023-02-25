@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
 
 app.use('/admin/', require('./routes/admin'));
 app.use('/users/', require('./routes/users'));
+app.use('/ownership/', require('./routes/ownership'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

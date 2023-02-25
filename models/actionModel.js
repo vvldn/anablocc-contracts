@@ -34,9 +34,10 @@ const actionSchema = new mongoose.Schema({
       default: documentsStatusEnum.VERIFICATION_PENDING,
     }
   }],
-  transactionHashes: [
-    { hash: { type: String, required: true }, status: { type: String, enum: Object.values(ownershipStatusEnum), required: true } }
-  ]
+  transactionHashes: [{ 
+    hash: { type: String, required: true }, 
+    status: { type: String, enum: Object.values(ownershipStatusEnum), required: true } 
+  }]
 });
 
 const Action = mongoose.model('Action', actionSchema);

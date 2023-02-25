@@ -137,8 +137,11 @@ const getAllActionsForUser = async (req, res, next) => {
 const setWalletForUser = async (req, res, next) => {
     try { 
         const userId = req.user.id;
-        await userAuthService.setAddressForUser(req.body.address, userId);
-        return res.status(200).send();
+        const walletAddress = req.body.address
+
+        const response = await userAuthService.setAddressForUser(walletAddress, userId);
+        
+        return res.status(200).send(response);
     } catch (err) {
         console.error(err);
         return res.status(500).send('Something went wrong.Try again later.');
@@ -148,8 +151,10 @@ const setWalletForUser = async (req, res, next) => {
 const getUserDetails = async (req, res, next) => {
     try {
         const { userId } = req.params;
-        const result = userActionsService.getUserDetails(userId);
-        return res.status(200).send({ user: result });
+
+        const response = userAuthService.getUserDetails(userId);
+
+        return res.status(200).send(response);
     } catch (err) {
         console.error(err);
         return res.status(500).send('Something went wrong.Try again later.');

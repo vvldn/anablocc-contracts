@@ -37,20 +37,33 @@ const checkAndLoginUser = async (otp) => {
     return { success: true, data: user };
 }
 
-const setAddressForUser = async (address, userId) => {
+const setAddressForUser = async (walletAddress, userId) => {
     const user = await userModel.findById(userId);
     if (user.walletAddress) return;
-    await userModel.findByIdAndUpdate(userId, { walletAddress: address });
+    await userModel.findByIdAndUpdate(userId, { $set: { walletAddress } });
 }
 
 const getUserDetailsByAadhar = async (aadhar) => {
     const user = await userModel.findOne({ aadhar }).lean();
-    return user;
+    if(!user){
+        return { success: false, error: 'User not found' };
+    }
+    return { success: true, data: user };;
 }
+
+const getUserDetails = async (userId) => {
+    const user = await userModel.findById(userId).lean();
+    if(!user){
+        return { success: false, error: 'User not found' };
+    }
+    return { success: true, data: user };;
+}
+
 module.exports = {
     checkAndSignUpUser,
     checkForUserWithPhoneAndSetOTP,
     checkAndLoginUser,
     setAddressForUser,
     getUserDetailsByAadhar,
+    getUserDetails,
 }

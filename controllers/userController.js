@@ -141,4 +141,5 @@ module.exports = {
     getAllPropertiesForUser,
     getPropertyDetails,
     initiatePropertySale,
+    getAllActionsForUser,
 }

@@ -134,6 +134,26 @@ const getAllActionsForUser = async (req, res, next) => {
     }
 }
 
+const verifyAadharOtpAndAcceptSale = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { actionId, otp } = req.body;
+        if(otp !== config.aadharOtp){
+            return { success: false, error: 'Invalid OTP' };
+        }
+
+        const response = await userActionsService.updateActionToSaleAccepted(actionId);
+        if(!response.success){
+            return res.status(400).json(response);
+        }
+
+        return res.status(200).json(response);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
+    }
+}
+
 module.exports = {
     userSignUp,
     checkAndSendOtp,
@@ -143,4 +163,5 @@ module.exports = {
     getPropertyDetails,
     initiatePropertySale,
     getAllActionsForUser,
+    verifyAadharOtpAndAcceptSale,
 }

@@ -11,8 +11,10 @@ router.post('/verify-otp', userController.verifyOtpAndLogin);
 
 router.post('/logout', userController.userLogout);
 
-router.post('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
+router.get('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
 
-router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser);
+router.get('/actions', userAuthMiddleware, userController.getAllActionsForUser);
+
+router.post('/actions/accept-sale', userAuthMiddleware, userController.verifyAadharOtpAndAcceptSale);
 
 module.exports = router;

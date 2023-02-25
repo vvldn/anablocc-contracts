@@ -15,4 +15,6 @@ config.jwt = {
     adminSecret: 'adminjstsecret',
 }
 
+config.aadharOtp = '1010';
+
 module.exports = config;

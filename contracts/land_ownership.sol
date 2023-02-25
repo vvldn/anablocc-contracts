@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8;
+import "hardhat/console.sol";
 
 contract LandOwnership {
     uint8 BASE = 1;
@@ -43,7 +44,7 @@ contract LandOwnership {
     function initiateSaleFromAdmin(bytes32[] memory pixels, address buyer) public {
         require(msg.sender == admin, 'E0');
         for(uint8 i = 0; i < pixels.length; i++) {
-            require(pixelToPlotMap[pixels[i]] != 0);
+            require(pixelToPlotMap[pixels[i]] == 0, 'E');
             pixelToPlotMap[pixels[i]] = plotCount;
             plotToPixelMap[plotCount].push(pixels[i]);
         }

@@ -27,6 +27,9 @@ contract LandOwnership {
     mapping(uint256 => Ownership) plotToOwnershipMap;
     mapping(address => bytes32) userHashes;
 
+    event InitiateSale(address indexed owner, address indexed buyer, uint256 ownershipId);
+    event CloseSale(uint256 ownershipId);
+
     uint256 plotCount;
     uint256 ownershipCount;
     address admin;
@@ -37,7 +40,7 @@ contract LandOwnership {
         ownershipCount = 1;
     }
 
-    function initiateSale(bytes32[] memory pixels) public {
+    function initiateSale(bytes32[] memory pixels, address buyer) public {
         for(uint8 i = 0; i < pixels.length; i++) {
             bytes32 pixel = pixels[i];
             if (pixelToPlotMap[pixel] == 0) {
@@ -46,15 +49,16 @@ contract LandOwnership {
                 require(msg.sender == plotToOwnershipMap[pixelToPlotMap[pixel]].owner, 'E1');
                 require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == BASE);
                 plotToOwnershipMap[pixelToPlotMap[pixel]].state = SALE_INITIATED;
+                plotToOwnershipMap[pixelToPlotMap[pixel]].buyer = buyer;
             }
         }
     }
 
-    function acceptSale(address user2, uint256 ownershipId) public {
+    function acceptSale(address buyer, uint256 ownershipId) public {
         require(msg.sender != plotToOwnershipMap[ownershipId].owner,'E3');
         require(plotToOwnershipMap[ownershipId].state == SALE_INITIATED, 'E4');
+        require(plotToOwnershipMap[ownershipId].buyer == buyer, 'E10');
         plotToOwnershipMap[ownershipId].state = SALE_ACCEPTED;
-        plotToOwnershipMap[ownershipId].buyer = user2;
     }
     
     function uploadBuyerDocs(string memory ipfsUrl, uint256 ownershipId) public {
@@ -146,6 +150,22 @@ contract LandOwnership {
             }
             if (hasPixel) {
                 ownerships[posx] = plotToOwnershipMap[pos];
+                posx += 1;
+            }
+        }
+        return ownerships;
+    }
+
+    function getOpenSales() public view returns (Ownership[] memory) {
+        uint256 openSaleCount = 0;
+        for(uint256 i = 0; i < plotCount; i++) {
+            if (plotToOwnershipMap[i].state == SALE_INITIATED) openSaleCount += 1; 
+        }
+        Ownership[] memory ownerships = new Ownership[](openSaleCount);
+        uint256 posx = 0;
+        for(uint256 i = 0; i < plotCount; i++) {
+            if (plotToOwnershipMap[i].state == SALE_INITIATED) {
+                ownerships[posx] = plotToOwnershipMap[i];
                 posx += 1;
             }
         }

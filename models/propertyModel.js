@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const { propertyStateEnum } = require('../enums')
+
 const propertySchema = new mongoose.Schema({
   ownerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -7,32 +9,51 @@ const propertySchema = new mongoose.Schema({
     required: true
   },
   pixels: [{
-    x: {
+    hash: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    latitude: {
       type: Number,
       required: true
     },
-    y: {
+    longitude: {
       type: Number,
       required: true
     }
   }],
   state: {
     type: String,
-    enum: Object.values(statesEnum),
-    default: statesEnum.BASE
-  }
-});
-
-/*
-    States = 
-        BASE
-        SALE_INITIATED
-        SALE_ACCEPTED
-        TX_INITIATED
-        TX_ACK
-        TX_DOC_UPLOADED
-        CLOSED
-    */
+    enum: Object.values(propertyStateEnum),
+    default: propertyStateEnum.BASE
+  },
+  ownershipHistory: [{
+    date: String,
+    seller: String,
+    buyer: String
+  }],
+  images: [{
+    url: {
+      type: String,
+      required: true
+    },
+    alt: String
+  }],
+  address: {
+    line: String,
+    locality: String,
+    city: String,
+    pincode: String,
+    state: String
+  },
+  documents: [{
+    url: {
+      type: String,
+      required: true
+    }
+  }]
+}, { createdAt: true, updatedAt: true });
 
 const Property = mongoose.model('Property', propertySchema);
 

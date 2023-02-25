@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const statesEnum = require('../enums/stateEnum');
+const { ownershipStatusEnum, documentsStatusEnum } = require('../enums');
 
 const actionSchema = new mongoose.Schema({
   sellerId: {
@@ -18,11 +18,22 @@ const actionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  state: {
+  status: {
     type: String,
-    enum: Object.values(statesEnum),
-    default: statesEnum.BASE
+    enum: Object.values(ownershipStatusEnum),
+    default: ownershipStatusEnum.SALE_INITIATED
   },
+  documents: [{
+    url: {
+      type: String,
+      required: true
+    },
+    verificationStatus: {
+      type: String,
+      enum: Object.values(documentsStatusEnum),
+      default: documentsStatusEnum.VERIFICATION_PENDING,
+    }
+  }]
 });
 
 const Action = mongoose.model('Action', actionSchema);

@@ -1,29 +1,13 @@
 const router = require('express').Router();
-const config = require('../../config/config');
 
-const actionModel = require('../../models/actionModel');
+const adminController = require('../../controllers/adminController');
 
-router.post('/login', async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-        if(email === config.admin.email && password === config.admin.password){
-            res.status(200).json({ success: true });
-        } else {
-            res.status(401).json({ success: false });
-        }
-    } catch (err) {
-        return next(err);
-    }
-});
+router.post('/login', adminController.adminLogin);
 
-router.get('/actions', async (req, res, next) => {
-    try {
-        const allActions = actionModel.find({});
+router.post('/logout', adminController.adminLogout);
 
-        res.status(200).json({ actions: allActions })
-    } catch (err) {
-        return next(err);
-    }
-})
+router.post('/properties', adminController.getAllProperties);
+
+router.post('/actions', adminController.getAllActions);
 
 module.exports = router;

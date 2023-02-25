@@ -6,3 +6,7 @@ const getOwnershipDetails = async (req, res, next) => {
         return res.status(500).send('Something went wrong.Try again later.');
     }
 }
+
+module.exports = {
+    getOwnershipDetails,
+};

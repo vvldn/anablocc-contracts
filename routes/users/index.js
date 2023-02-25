@@ -9,6 +9,8 @@ router.post('/login', userController.checkAndSendOtp);
 
 router.post('/verify-otp', userController.verifyOtpAndLogin);
 
+router.post('/logout', userController.userLogout);
+
 router.post('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
 
 router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser);

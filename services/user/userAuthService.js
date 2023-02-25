@@ -18,7 +18,7 @@ const checkForUserWithPhoneAndSetOTP = async (phone) => {
 }
 
 const checkAndLoginUser = async (otp) => {
-    const user = await userModel.findOne({ otp }).lean();
+    const user = await userModel.findOneAndUpdate({ otp }, { $unset: { otp: 1 } }, { new: true }).lean();
     if(!user){
         return { success: false, error: 'Invalid OTP' };
     }

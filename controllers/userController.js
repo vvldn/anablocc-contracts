@@ -44,7 +44,7 @@ const verifyOtpAndLogin = async (req, res, next) => {
     try {
         const { otp } = req.body;
 
-        const response = userAuthService.checkAndLoginUser(otp);
+        const response = await userAuthService.checkAndLoginUser(otp);
         if(!response.success){
             return res.status(401).send(response);
         }
@@ -52,7 +52,7 @@ const verifyOtpAndLogin = async (req, res, next) => {
         const token = jwt.sign({ id: response.data._id }, config.jwt.userSecret);
         if (token) res.cookie('token', token, { httpOnly: true });
         
-        return res.status(200).json({ success: true, token: token });
+        return res.status(200).json({ success: true, data: { token, user: response.data } });
     } catch (err) {
         console.error(err);
         return res.status(500);

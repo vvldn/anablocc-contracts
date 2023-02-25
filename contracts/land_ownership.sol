@@ -27,7 +27,7 @@ contract LandOwnership {
     mapping(uint256 => Ownership) plotToOwnershipMap;
     mapping(address => bytes32) userHashes;
 
-    event InitiateSale(address indexed owner, address indexed buyer, uint256 ownershipId);
+    event InitiateSale(uint256 ownershipId);
     event CloseSale(uint256 ownershipId);
 
     uint256 plotCount;
@@ -40,18 +40,26 @@ contract LandOwnership {
         ownershipCount = 1;
     }
 
-    function initiateSale(bytes32[] memory pixels, address buyer) public {
+    function initiateSaleFromAdmin(bytes32[] memory pixels, address buyer) public {
+        require(msg.sender == admin, 'E0');
         for(uint8 i = 0; i < pixels.length; i++) {
-            bytes32 pixel = pixels[i];
-            if (pixelToPlotMap[pixel] == 0) {
-                require(msg.sender == admin, 'E0');
-            } else {
-                require(msg.sender == plotToOwnershipMap[pixelToPlotMap[pixel]].owner, 'E1');
-                require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == BASE);
-                plotToOwnershipMap[pixelToPlotMap[pixel]].state = SALE_INITIATED;
-                plotToOwnershipMap[pixelToPlotMap[pixel]].buyer = buyer;
-            }
+            require(pixelToPlotMap[pixels[i]] != 0);
+            pixelToPlotMap[pixels[i]] = plotCount;
+            plotToPixelMap[plotCount].push(pixels[i]);
         }
+        plotToOwnershipMap[plotCount].state = SALE_INITIATED;
+        plotToOwnershipMap[plotCount].owner = admin;
+        plotToOwnershipMap[plotCount].buyer = buyer;
+        emit InitiateSale(plotCount);
+        plotCount += 1;
+    }
+
+    function initiateSale(uint256 ownershipId, address buyer) public {
+        require(msg.sender == plotToOwnershipMap[ownershipId].owner, 'E1');
+        require(plotToOwnershipMap[ownershipId].state == BASE);
+        plotToOwnershipMap[ownershipId].state = SALE_INITIATED;
+        plotToOwnershipMap[ownershipId].buyer = buyer;
+        emit InitiateSale(ownershipId);
     }
 
     function acceptSale(address buyer, uint256 ownershipId) public {
@@ -95,15 +103,33 @@ contract LandOwnership {
 
     function approveDocumentsAndMarkSale(bytes32[] memory pixels, address buyer) public {
         require(msg.sender == admin);
+        plotToOwnershipMap[plotCount].owner = buyer;
+        plotToOwnershipMap[plotCount].state = BASE;
+        plotCount = plotCount + 1;
+        uint256[] memory plots = new uint256[](32);
+        uint8 posx = 0;
         for(uint8 i = 0; i < pixels.length; i++) {
             bytes32 pixel = pixels[i];
             require(plotToOwnershipMap[pixelToPlotMap[pixel]].buyer == buyer);
             require(plotToOwnershipMap[pixelToPlotMap[pixel]].state == TX_ACKNOWLEDGED);
             plotToPixelMap[plotCount].push(pixel);
             pixelToPlotMap[pixel] = plotCount;
-            plotToOwnershipMap[plotCount].owner = buyer;
-            plotToOwnershipMap[plotCount].state = BASE;
-            plotCount = plotCount + 1;
+            bool found = false;
+            for(uint8 j = 0; j < posx; j++) {
+                if(plots[j] == pixelToPlotMap[pixel]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false) {
+                plots[posx] = pixelToPlotMap[pixel];
+                posx += 1;
+            }
+        }
+        for (uint8 i = 0; i < posx; i++) {
+            plotToOwnershipMap[plots[i]].state = BASE;
+            // this is buggy - if someone sells fully we still allow it to be sold as of now
+            emit CloseSale(plots[i]);
         }
     }
 

@@ -125,8 +125,7 @@ contract LandOwnership {
             }
         }
         for (uint8 i = 0; i < posx; i++) {
-            plotToOwnershipMap[plots[i]].state = BASE;
-            // this is buggy - if someone sells fully we still allow it to be sold as of now
+            plotToOwnershipMap[plots[i]].state = CLOSED;
             emit CloseSale(plots[i]);
         }
     }

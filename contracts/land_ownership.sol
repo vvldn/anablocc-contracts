@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8;
-import "hardhat/console.sol";
 
 contract LandOwnership {
     uint8 BASE = 1;
@@ -32,13 +31,11 @@ contract LandOwnership {
     event CloseSale(uint256 ownershipId);
 
     uint256 plotCount;
-    uint256 ownershipCount;
     address admin;
 
     constructor() {
         admin = msg.sender;
         plotCount = 1;
-        ownershipCount = 1;
     }
 
     function initiateSaleFromAdmin(bytes32[] memory pixels, address buyer) public {
@@ -58,15 +55,15 @@ contract LandOwnership {
     function initiateSale(uint256 ownershipId, address buyer) public {
         require(msg.sender == plotToOwnershipMap[ownershipId].owner, 'E1');
         require(plotToOwnershipMap[ownershipId].state == BASE);
+        require(plotToOwnershipMap[ownershipId].owner != buyer);
         plotToOwnershipMap[ownershipId].state = SALE_INITIATED;
         plotToOwnershipMap[ownershipId].buyer = buyer;
         emit InitiateSale(ownershipId);
     }
 
-    function acceptSale(address buyer, uint256 ownershipId) public {
-        require(msg.sender != plotToOwnershipMap[ownershipId].owner,'E3');
+    function acceptSale(uint256 ownershipId) public {
         require(plotToOwnershipMap[ownershipId].state == SALE_INITIATED, 'E4');
-        require(plotToOwnershipMap[ownershipId].buyer == buyer, 'E10');
+        require(plotToOwnershipMap[ownershipId].buyer == msg.sender, 'E10');
         plotToOwnershipMap[ownershipId].state = SALE_ACCEPTED;
     }
     
@@ -193,7 +190,7 @@ contract LandOwnership {
         for(uint256 i = 0; i < plotCount; i++) {
             if (plotToOwnershipMap[i].state == SALE_INITIATED) {
                 ownerships[posx] = plotToOwnershipMap[i];
-                posx += 1;
+                posx = posx + 1;
             }
         }
         return ownerships;

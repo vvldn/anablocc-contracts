@@ -27,6 +27,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.10.0",
     "pdf-lib": "^1.17.1",
+    "underscore": "^1.13.6",
     "yargs": "^17.5.1"
   }
 }

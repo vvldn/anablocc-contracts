@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const crypto = require("crypto");
 const _ = require("underscore");
 const hre = require("hardhat");
@@ -35,10 +36,7 @@ const generateGrid = (origin, widthX, widthY) => {
   };
   const plot2 = {
     pixels: [
-      {
-        lat: x + centerDistX * 3,
-        lng: y + centerDistY,
-      },
+      { lat: x + centerDistX * 3, lng: y + centerDistY },
     ],
     layout: [
       { lat: x + widthX , lng: y },
@@ -123,8 +121,8 @@ const generateGrid = (origin, widthX, widthY) => {
 
 async function initiateSale(plot, user) {
     const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
-    const address = '0xF880360550a419B66eFB1646f44699d5991ed32C';
-    const loContract = loContractFactory.attach(address);
+    // const address = config.contractAddress;
+    const loContract = loContractFactory.attach(config.contractAddress);
     const hashes = _.map(plot.pixels, pixel => `0x${pixel.hash}`);
     const result = await loContract.initiateSaleFromAdmin(hashes, user.walletAddress);
     const hash = result.hash;
@@ -135,50 +133,50 @@ async function initiateSale(plot, user) {
     });
 }
 
-const users = [
-  {
-    name: 'Vighnesh',
-    walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb7',
-    aadhar: '1234123412341234',
-    email: 'abcd@gmail.com',
-    phone: '9999888800',
-  },
-  {
-    name: 'Kartikey',
-    walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b0',
-    aadhar: '1234123412341235',
-    email: 'abce@gmail.com',
-    phone: '9999888801',
-  },
-  {
-    name: 'Vishal',
-    walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaEf',
-    aadhar: '1234123412341236',
-    email: 'abcf@gmail.com',
-    phone: '9999888802',
-  },
-  {
-    name: 'Sahaj',
-    walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb3',
-    aadhar: '1234123412341237',
-    email: 'abcg@gmail.com',
-    phone: '9999888803',
-  },
-  {
-    name: 'Danish',
-    walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b1',
-    aadhar: '1234123412341238',
-    email: 'abch@gmail.com',
-    phone: '9999888804',
-  },
-  {
-    name: 'Abhigya',
-    walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaE2',
-    aadhar: '1234123412341239',
-    email: 'abci@gmail.com',
-    phone: '9999888805',
-  }
-]
+// const users = [
+//   {
+//     name: 'Vighnesh',
+//     walletAddress: '0xF267735fd551a1dC341ac7a3227cACC312F7dfb7',
+//     aadhar: '1234123412341234',
+//     email: 'abcd@gmail.com',
+//     phone: '9999888800',
+//   },
+//   {
+//     name: 'Kartikey',
+//     walletAddress: '0xA454a05d3989f55Ff2FC22052E61a6a1911209b0',
+//     aadhar: '1234123412341235',
+//     email: 'abce@gmail.com',
+//     phone: '9999888801',
+//   },
+//   {
+//     name: 'Vishal',
+//     walletAddress: '0xe49B2820FA0B3a5f10b4Cb40F836A0E85dc6eaEf',
+//     aadhar: '1234123412341236',
+//     email: 'abcf@gmail.com',
+//     phone: '9999888802',
+//   },
+//   {
+//     name: 'Sahaj',
+//     walletAddress: '0x1D24D985E3c225CFC9635788982642FF8fd6F56e',
+//     aadhar: '1234123412341237',
+//     email: 'abcg@gmail.com',
+//     phone: '9999888803',
+//   },
+//   {
+//     name: 'Danish',
+//     walletAddress: '0x31003c02dCe06E06b3Ab962d23b3E54ee73E5688',
+//     aadhar: '1234123412341238',
+//     email: 'abch@gmail.com',
+//     phone: '9999888804',
+//   },
+//   {
+//     name: 'Abhigya',
+//     walletAddress: '0x7A18a3E54e3DB679135f7165759D81fc0944Fb9d',
+//     aadhar: '1234123412341239',
+//     email: 'abci@gmail.com',
+//     phone: '9999888805',
+//   }
+// ]
 
 async function startMigration() {
     const widthX = 0.00009
@@ -189,38 +187,63 @@ async function startMigration() {
     };
     const plots = generateGrid(origin, widthX, widthY);
 
-    const newUsers = await Promise.all(_.map(users, user => userModel.create(user)));
+    const users = await userModel.find({});
     
-    const hashModels = [];
     for (let i = 0; i < 6; i++) {
-      
-    }
-    const user = newUsers[1];
+      try {
+        const user = users[i];
+        const hash = await initiateSale(plots[i], user);
+        const { hash: transactionHash, ownershipId } = hash;
 
-    const hash = await initiateSale(plots[3], user);
-    const { hash: transactionHash, ownershipId } = hash;
+        const pixelsWithHash = _.map(plots[i].pixels, pixel => {
+          const pixelHash = getCoordinateHash(pixel.lat, pixel.lng);
+          return { hash: pixelHash, lat: pixel.lat, lng: pixel.lng };
+        })
 
-    const ownership = await ownershipModel.create({
-      ownerId: config.adminUserId,
-      buyerId: user._id,
-      ownershipId,
-      transactions: [ {hash: transactionHash, status: ownershipStatusEnum.SALE_INITIATED} ],
-      property: {
-        mapLayout: plots[3].layout,
-        pixels: plots[3].pixels,
-        address: {
-          line: '619, 1st main road',
-          locality: 'HSR Layout',
-          city: 'HSR Layout',
-          pincode: '560102',
-          state: 'Karnataka'
-        }
+        const ownership = await ownershipModel.create({
+          ownerId: config.adminUserId,
+          buyerId: user._id,
+          ownershipId,
+          transactions: [ {hash: transactionHash, status: ownershipStatusEnum.SALE_INITIATED} ],
+          property: {
+            mapLayout: plots[i].layout,
+            pixels: pixelsWithHash,
+            address: {
+              line: '619, 1st main road',
+              locality: 'HSR Layout',
+              city: 'HSR Layout',
+              pincode: '560102',
+              state: 'Karnataka'
+            }
+          }
+        });
+        console.log(JSON.stringify(ownership));
+      } catch (err) {
+        console.error(err)
       }
-    })
-
-    // backend.registerActions();
-    console.log(JSON.stringify(ownership));
+    }
 }
 
-startMigration();
+// const checkData = async () => {
+//     const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
+//     const address = config.contractAddress;
+//     const loContract = loContractFactory.attach(address);
+//     const result = await loContract.getPixelHistory('0xde306c6528c3209de0e1aeaa9a746db020fef62f13fa4fc0ea328b68d51faafd');
+//     console.log(result);
+// }
 
+// connect to database
+const connectToDatabase = async () => {
+  try {
+    mongoose.set("strictQuery", false);
+    await mongoose.connect(config.mongoUri);
+    console.log('Connected to mongodb');
+
+    await startMigration();
+  } catch (err) {
+    console.error(`Err: ${JSON.stringify(err)}`);
+  }
+}
+connectToDatabase();
+
+// checkData();

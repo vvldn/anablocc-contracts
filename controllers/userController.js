@@ -147,7 +147,7 @@ const setWalletForUser = async (req, res, next) => {
     }
 }
 
-const getUserDetails = async (req, res, next) => {
+const getUserDetailsById = async (req, res, next) => {
     try {
         const { userId } = req.params;
 
@@ -159,6 +159,20 @@ const getUserDetails = async (req, res, next) => {
         return res.status(500).send('Something went wrong.Try again later.');
     }
 }
+
+const getUserDetailsByAadhar = async (req, res, next) => {
+    try {
+        const { aadhar } = req.params;
+
+        const response = userAuthService.getUserDetailsByAadhar(aadhar);
+
+        return res.status(200).send(response);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Something went wrong.Try again later.');
+    }
+}
+
 module.exports = {
     userSignUp,
     checkAndSendOtp,
@@ -169,5 +183,6 @@ module.exports = {
     initiatePropertySale,
     getAllActionsForUser,
     setWalletForUser,
-    getUserDetails,
+    getUserDetailsById,
+    getUserDetailsByAadhar
 }

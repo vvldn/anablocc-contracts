@@ -10,6 +10,6 @@ router.get('/properties/:status', adminController.getAllProperties);
 
 router.get('/actions/:status', adminController.getAllActions);
 
-router.post('/add-property', adminController.addPropertyFromAdmin);
+// router.post('/add-property', adminController.addPropertyFromAdmin);
 
 module.exports = router;

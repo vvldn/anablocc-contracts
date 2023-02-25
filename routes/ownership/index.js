@@ -4,6 +4,6 @@ const ownershipController = require('./../../controllers/ownershipController');
 
 router.get('/:ownershipId', ownershipController.getOwnershipDetails);
 
-router.post('/:ownershipId/ack-txn', ownershipController.acknowledgeTransaction);
+router.post('/:ownershipId/action/:action', ownershipController.registerTransaction);
 
 module.exports = router;

@@ -11,7 +11,9 @@ router.post('/verify-otp', userController.verifyOtpAndLogin);
 
 router.post('/logout', userController.userLogout);
 
-router.get('/:userId', userController.getUserDetails);
+router.get('/:userId', userController.getUserDetailsById);
+
+router.get('/aadhar/:aadhar', userController.getUserDetailsByAadhar);
 
 router.post('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
 

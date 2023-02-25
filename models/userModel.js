@@ -31,10 +31,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     sparse: true
   },
-  otp: {
-    type: String,
-    unique: true,
-  }
 }, { createdAt: true },);
 
 const User = mongoose.model('User', userSchema);

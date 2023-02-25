@@ -19,4 +19,6 @@ config.adminUserId = '63f9dca1b4b02daa53fdb977';
 
 config.ownershipId = '001';
 
+config.contractAddress = '0xA7cCd8E659099dfe58E394AAb4442E246D46b061';
+
 module.exports = config;

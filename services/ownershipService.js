@@ -1,8 +1,27 @@
 const _ = require('underscore');
+const hre = require("hardhat");
+const config = require('../config/config');
 const { ownershipStatusEnum } = require('../enums');
-
-const userModel = require('../models/userModel');
+const actionsService = require('./actionsService');
 const ownershipModel = require('../models/ownershipModel');
+
+const getOwnershipHistoryWithPixelHash = async (pixelHash) => {
+    try {
+        const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
+        const address = config.contractAddress;
+        const loContract = loContractFactory.attach(address);
+        const result = await loContract.getPixelHistory();
+        return { success: true, data: result };
+    } catch (err) {
+        console.error(err);
+
+    }
+}
+
+const getOwnershipDetails = async (ownershipId) => {
+    const ownership = await ownershipModel.findById(ownershipId).lean();
+    return ownership;
+}
 
 const getPropertyListDto = (ownerships) => {
     const propertyList = _.map(ownerships, ownership => ownership.property);
@@ -39,8 +58,8 @@ const getAllActionsForAdmin = async (status) => {
     return { success: true, data: propertyList };
 }
 
-const getOwnershipHistoryDto = (ownerships) => {
-    const history = _.map(ownerships, ownership => {
+const getOwnershipHistoryDto = (historyFromChain) => {
+    const history = _.map(historyFromChain, ownership => {
         const { ownerId: owner, lastOwnerId: lastOwner, ownershipId, documents, transactions } = ownership;
         return { owner: owner.name, lastOwner: lastOwner.name, ownershipId, documents, transactions }
     });
@@ -49,13 +68,15 @@ const getOwnershipHistoryDto = (ownerships) => {
 }
 
 // TODO: discuss the findQuery for this
-const getOwnershipHistoryForProperty = async (mapLayout) => {
-    if(!mapLayout) return { success: false, error: 'mapLayout is required' };
+const getOwnershipHistoryForProperty = async (userId, ownershipId) => {
+    if(!ownershipId) return { success: false, error: 'ownershipId is required' };
 
-    const findQuery = { mapLayout };
-    const ownerships = await ownershipModel.find(findQuery).populate('ownerId lastOwnerId');
+    const findQuery = { ownerId: userId, ownershipId };
+    const ownership = await ownershipModel.findOne(findQuery).populate('ownerId lastOwnerId');
+    const pixelHash = ownership.property.pixels[0].hash;
+    const historyFromChain = await getOwnershipHistoryWithPixelHash(pixelHash);
 
-    const ownershipHistory = getOwnershipHistoryDto(ownerships);
+    const ownershipHistory = getOwnershipHistoryDto(historyFromChain);
 
     return { success: true, data: ownershipHistory };
 }
@@ -94,35 +115,50 @@ const getPropertyDetails = async (userId, ownershipId) => {
     return { success: true, data: propertyDto };
 }
 
-const checkAndInitiatePropertySale = async (model) => {
-    const { userId, ownershipId, buyerAadhar, transactionHash } = model;
-    
-    const ownership = await ownershipModel.findOne({ ownerId: userId, ownershipId, status: ownershipStatusEnum.BASE }).lean();
-    if(!ownership) return { success: false, error: 'Invalid request for sale' };
+const checkAndRegisterTransaction = async (ownershipId, action, data) => {
+    let response;
+    switch (action) {
+        case ownershipStatusEnum.SALE_INITIATED:
+            response = await actionsService.initiateSale(ownershipId, data);
+            break;
+        case ownershipStatusEnum.SALE_ACCEPTED:
+            response = await actionsService.acceptSale(ownershipId, data);
+            break;
+        case ownershipStatusEnum.DOC_UPLOADED:
+            response = await actionsService.uploadDocuments(ownershipId, data);
+            break;
+        case 'DOC_REJECT':
+            response = await actionsService.rejectDocuments(ownershipId, data);
+            break;
+        case ownershipStatusEnum.DOC_APPROVED:
+            response = await actionsService.approveDocuments(ownershipId, data);
+            break;
+        case ownershipStatusEnum.TX_INITIATED:
+            response = await actionsService.initiatePayment(ownershipId, data);
+            break;
+        case ownershipStatusEnum.TX_ACKNOWLEDGED:
+            response = await actionsService.acknowledgePayment(ownershipId, data);
+            break;
+        case ownershipStatusEnum.CLOSED:
+            response = await actionsService.closeSale(ownershipId, data);
+            break;
+        case 'CANCEL_SALE':
+            response = await actionsService.cancelSale(ownershipId, data);
+            break;
+        default:
+            response = { success: false, error: 'Invalid Action' }
+            break;
+    }
 
-    const buyer = await userModel.findOne({ aadhar: buyerAadhar }).lean();
-    if(!buyer) return { success: false, error: 'Buyer with given aadhar no not found' };
-
-    const updatedOwnership = await ownershipModel.findByIdAndUpdate(
-        ownership._id,
-        { $set: { 
-            buyerId: buyer._id, 
-            status: ownershipStatusEnum.SALE_INITIATED, 
-            transactions: { 
-                $addToSet: { hash: transactionHash, status: ownershipStatusEnum.SALE_INITIATED } 
-            } 
-        } },
-        { new: true }
-    );
-
-    return { success: true, data: updatedOwnership };
+    return response;
 }
 
 module.exports = {
+    getOwnershipDetails,
     getAllPropertiesForAdmin,
     getAllActionsForAdmin,
     getOwnershipHistoryForProperty,
     getPropertyListForUser,
     getPropertyDetails,
-    checkAndInitiatePropertySale,
+    checkAndRegisterTransaction,
 }

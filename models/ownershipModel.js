@@ -5,16 +5,15 @@ const { ownershipStatusEnum, documentsStatusEnum } = require('../enums')
 
 const ownershipSchema = new mongoose.Schema({
   lastOwnerId: { type: ObjectId, ref: 'User' },
-  property: [{
+  property: {
     pixels: [{
       hash: { type: String, required: true, unique: true },
       lat: { type: Number, required: true },
-      long: { type: Number, required: true }
+      lng: { type: Number, required: true }
     }],
     mapLayout: [{
-      hash: { type: String, required: true, unique: true },
       lat: { type: Number, required: true },
-      long: { type: Number, required: true }
+      lng: { type: Number, required: true }
     }],
     images: [{
       url: {
@@ -30,7 +29,7 @@ const ownershipSchema = new mongoose.Schema({
       pincode: String,
       state: String
     }
-  }],
+  },
   ownerId: { type: ObjectId, ref: 'User', required: true },
   buyerId: { type: ObjectId, ref: 'User' },
   status: {
@@ -38,7 +37,7 @@ const ownershipSchema = new mongoose.Schema({
     enum: Object.values(ownershipStatusEnum),
     default: ownershipStatusEnum.SALE_INITIATED,
   },
-  ownershipId: { type: String, required: true },
+  ownershipId: { type: String, unique: true, required: true },
   documents: [{
     ipfsAddress: {
       type: String,

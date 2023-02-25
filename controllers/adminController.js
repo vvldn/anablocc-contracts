@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
 const adminAuthService = require('../services/admin/adminAuthService');
-const adminPropertiesService = require('../services/admin/adminPropertiesService');
 const ownershipService = require('../services/ownershipService');
 
 const adminLogin = async (req, res, next) => {
@@ -59,23 +58,23 @@ const getAllActions = async (req, res, next) => {
     }
 }
 
-const addPropertyFromAdmin = async (req, res, next) => {
-    try {
-        const model = req.body;
+// const addPropertyFromAdmin = async (req, res, next) => {
+//     try {
+//         const model = req.body;
 
-        const response = await adminPropertiesService.addNewProperty(model);
+//         const response = await adminPropertiesService.addNewProperty(model);
 
-        return res.status(200).json(response);
-    } catch (err) {
-        console.error(err);
-        return res.status(500).send('Something went wrong.Try again later.');
-    }
-}
+//         return res.status(200).json(response);
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).send('Something went wrong.Try again later.');
+//     }
+// }
 
 module.exports = {
     adminLogin,
     adminLogout,
     getAllProperties,
     getAllActions,
-    addPropertyFromAdmin,
+    // addPropertyFromAdmin,
 }

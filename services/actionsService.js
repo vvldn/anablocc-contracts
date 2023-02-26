@@ -3,12 +3,12 @@ const { ownershipStatusEnum, documentsStatusEnum } = require('../enums');
 const ownershipModel = require('../models/ownershipModel');
 
 const initiateSale = async (ownershipId, data) => {
-    const { userId: ownerId, buyerId, transactionHash } = data;
+    const { userId: ownerId, buyerId, transactionHash, amount } = data;
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
         { ownerId, ownershipId },
         { $set: { 
-            buyerId, 
+            buyerId, amount,
             status: ownershipStatusEnum.SALE_INITIATED,
             transactions: [{ hash: transactionHash, status: ownershipStatusEnum.SALE_INITIATED }]
         } },

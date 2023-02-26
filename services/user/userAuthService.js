@@ -18,9 +18,9 @@ const checkAndSignUpUser = async (model) => {
 }
 
 const checkForUserWithPhoneAndSetOTP = async (phone) => {
-    const user = await userModel.find({ phone }).lean();
+    const user = await userModel.findOne({ phone }).lean();
     if(!user){
-        return { success: false };
+        return { success: false, error: 'User with this phone not found' };
     }
 
     await userModel.findOneAndUpdate({ phone }, { $set: { otp: config.testOtp } });
@@ -28,9 +28,9 @@ const checkForUserWithPhoneAndSetOTP = async (phone) => {
     return { success: true, otp: config.testOtp };
 }
 
-const checkAndLoginUser = async (otp) => {
-    const user = await userModel.findOneAndUpdate({ otp }, { $unset: { otp: 1 } }, { new: true }).lean();
-    if(!user){
+const checkAndLoginUser = async (phone, otp) => {
+    const user = await userModel.findOneAndUpdate({ phone }, { $unset: { otp: 1 } }, { new: true }).lean();
+    if(!user || otp !== config.testOtp){
         return { success: false, error: 'Invalid OTP' };
     }
 

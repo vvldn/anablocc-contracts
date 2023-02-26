@@ -27,10 +27,14 @@ const checkAndSendOtp = async (req, res, next) => {
     try {
         const { phone } = req.body;
         if(!phone) return res.status(400).json({ success: false, error: 'Phone required' });
+
+        if(phone === config.adminPhone){
+            return res.status(200).json({ success: true, otp: config.testOtp });
+        }
         
         const response = await userAuthService.checkForUserWithPhoneAndSetOTP(phone);
         if(!response.success){
-            return res.status(404).json({ success: false, error: 'User with this phone not found' });
+            return res.status(404).json(response);
         }
 
         return res.status(200).json(response);
@@ -42,17 +46,24 @@ const checkAndSendOtp = async (req, res, next) => {
 
 const verifyOtpAndLogin = async (req, res, next) => {
     try {
-        const { otp } = req.body;
+        const { phone, otp } = req.body;
 
-        const response = await userAuthService.checkAndLoginUser(otp);
+        if(phone === config.adminPhone){
+            const token = jwt.sign({ role: 'ADMIN' }, config.jwt.adminSecret);
+            if (token) res.cookie('token', token, { httpOnly: true });
+        
+            return res.status(200).json({ success: true, data: { token , role: 'ADMIN' } });
+        }
+
+        const response = await userAuthService.checkAndLoginUser(phone, otp);
         if(!response.success){
             return res.status(401).send(response);
         }
 
-        const token = jwt.sign({ id: response.data._id }, config.jwt.userSecret);
+        const token = jwt.sign({ id: response.data._id, role: 'USER' }, config.jwt.userSecret);
         if (token) res.cookie('token', token, { httpOnly: true });
         
-        return res.status(200).json({ success: true, data: { token, user: response.data } });
+        return res.status(200).json({ success: true, data: { token, user: response.data, role: 'USER' } });
     } catch (err) {
         console.error(err);
         return res.status(500).send('Something went wrong.Try again later.');
@@ -71,12 +82,11 @@ const userLogout = (req, res, next) => {
 
 const getAllPropertiesForUser = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const { userId } = req.params;
         const response = await ownershipService.getPropertyListForUser(userId);
         if(!response.success){
-            return res.status(400).json({ response })
+            return res.status(400).json(response)
         }
-
         return res.status(200).json(response)
     } catch (err) {
         console.error(err);
@@ -86,8 +96,7 @@ const getAllPropertiesForUser = async (req, res, next) => {
 
 const getPropertyDetails = async (req, res, next) => {
     try {
-        const { ownershipId } = req.params;
-        const userId = req.user.id;
+        const { ownershipId, userId } = req.params;
         const response = await ownershipService.getPropertyDetails(userId, ownershipId);
         if(!response.success){
             return res.status(400).json(response);
@@ -103,7 +112,7 @@ const getPropertyDetails = async (req, res, next) => {
 const initiatePropertySale = async (req, res, next) => {
     try {
         const { ownershipId, buyerAadhar, transactionHash } = req.body;
-        const userId = req.user.id;
+        const { userId } = req.params
         const response = await ownershipService.checkAndInitiatePropertySale({
             userId, ownershipId, buyerAadhar, transactionHash
         });
@@ -120,7 +129,7 @@ const initiatePropertySale = async (req, res, next) => {
 
 const getAllActionsForUser = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const { userId } = req.params
         const response = await ownershipService.getUserActions(userId);
         if(!response.success){
             return res.status(400).json(response);
@@ -135,7 +144,7 @@ const getAllActionsForUser = async (req, res, next) => {
 
 const setWalletForUser = async (req, res, next) => {
     try { 
-        const userId = req.user.id;
+        const { userId } = req.params
         const walletAddress = req.body.address
 
         const response = await userAuthService.setAddressForUser(walletAddress, userId);

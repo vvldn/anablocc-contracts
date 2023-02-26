@@ -5,22 +5,15 @@ const { ownershipStatusEnum } = require('../enums');
 const actionsService = require('./actionsService');
 const ownershipModel = require('../models/ownershipModel');
 
-const getOwnershipHistoryWithPixelHash = async (pixelHash) => {
-    const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
-    const loContract = loContractFactory.attach(config.contractAddress);
-    const result = await loContract.getPixelHistory(pixelHash);
-    return result;
-}
-
 const getOwnershipDetails = async (ownershipId) => {
-    const ownership = await ownershipModel.findById(ownershipId).lean();
+    const ownership = await ownershipModel.findOne({ ownershipId }).lean();
     return ownership;
 }
 
 const getPropertyListDto = (ownerships) => {
     const propertyList = _.map(ownerships, ownership => {
-        const { ownerId: owner, status, ownershipId, property } = ownership;
-        return { owner: owner.name, ...property, ownershipId, status };
+        const { ownerId: owner, buyerId: buyer, status, ownershipId, property } = ownership;
+        return { owner, buyer, ...property, ownershipId, status };
     });
 
     return propertyList;
@@ -29,7 +22,7 @@ const getPropertyListDto = (ownerships) => {
 const getAllPropertiesForAdmin = async (status) => {
     if(!status) status = ownershipStatusEnum.SALE_INITIATED;
 
-    const ownerships = await ownershipModel.find({ status }).populate('ownerId');
+    const ownerships = await ownershipModel.find({ status }).populate('ownerId buyerId');
 
     const propertyList = getPropertyListDto(ownerships);
 
@@ -38,8 +31,8 @@ const getAllPropertiesForAdmin = async (status) => {
 
 const getActionsListDto = (ownerships) => {
     const actionList = _.map(ownerships, ownership => {
-        const { ownerId: owner, status, ownershipId, documents } = ownership;
-        return { owner, status, ownershipId, documents }
+        const { ownerId: owner, buyerId: buyer, status, ownershipId, documents } = ownership;
+        return { owner, buyer, status, ownershipId, documents }
     });
 
     return actionList;
@@ -48,11 +41,11 @@ const getActionsListDto = (ownerships) => {
 const getAllActionsForAdmin = async (status) => {
     if(!status) status = ownershipStatusEnum.SALE_INITIATED;
 
-    const ownerships = await ownershipModel.find({ status }).populate('ownerId');
+    const ownerships = await ownershipModel.find({ status }).populate('ownerId buyerId');
 
-    const propertyList = getActionsListDto(ownerships);
+    const actionList = getActionsListDto(ownerships);
 
-    return { success: true, data: propertyList };
+    return { success: true, data: actionList };
 }
 
 const getOwnershipHistoryDto = (historyFromChain) => {
@@ -93,7 +86,7 @@ const getOwnershipHistoryForProperty = async (ownershipId) => {
 const getPropertyListForUserDto = (ownerships) => {
     const propertyList = _.map(ownerships, ownership => {
         const { ownerId: owner, ownershipId, property } = ownership;
-        return { owner: owner.name, ...property, ownershipId };
+        return { owner, ...property, ownershipId };
     });
 
     return propertyList;
@@ -109,9 +102,19 @@ const getPropertyListForUser = async (userId) => {
     return { success: true, data: propertyList };
 }
 
+const getUserActions = async (userId) => {
+    if(!userId) return { success: false, error: 'userId is required' };
+
+    const ownerships = await ownershipModel.find({ $or: [ { ownerId: userId }, { buyerId: userId } ] }).populate('ownerId buyerId');
+
+    const actionList = getActionsListDto(ownerships);
+
+    return { success: true, data: actionList };
+}
+
 const getPropertyDetailsDto = (ownership) => {
     const { ownerId: owner, ownershipId, property } = ownership;
-    return { owner: owner.name, property, ownershipId, ...property };
+    return { owner, property, ownershipId, ...property };
 }
 
 const getPropertyDetails = async (userId, ownershipId) => {
@@ -168,6 +171,7 @@ module.exports = {
     getAllActionsForAdmin,
     getOwnershipHistoryForProperty,
     getPropertyListForUser,
+    getUserActions,
     getPropertyDetails,
     checkAndRegisterTransaction,
 }

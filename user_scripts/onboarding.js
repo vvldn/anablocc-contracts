@@ -228,7 +228,8 @@ async function startMigration() {
 //     const loContractFactory = await hre.ethers.getContractFactory("LandOwnership");
 //     const address = config.contractAddress;
 //     const loContract = loContractFactory.attach(address);
-//     const result = await loContract.getPixelHistory('0xde306c6528c3209de0e1aeaa9a746db020fef62f13fa4fc0ea328b68d51faafd');
+//     const result = await loContract.getPixelHistory('0xdfcc071524492569ab3a389d590384096c8678ecbcde01a27d16b78389b2d1e6');
+//     const response = await loContract.getOpenSales();
 //     console.log(result);
 // }
 

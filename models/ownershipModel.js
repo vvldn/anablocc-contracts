@@ -5,9 +5,10 @@ const { ownershipStatusEnum, documentsStatusEnum } = require('../enums')
 
 const ownershipSchema = new mongoose.Schema({
   lastOwnerId: { type: ObjectId, ref: 'User' },
+  amount: { type: Number },
   property: {
     pixels: [{
-      hash: { type: String, required: true, unique: true },
+      hash: { type: String, required: true },
       lat: { type: Number, required: true },
       lng: { type: Number, required: true }
     }],

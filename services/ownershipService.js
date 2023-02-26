@@ -57,23 +57,35 @@ const getAllActionsForAdmin = async (status) => {
 
 const getOwnershipHistoryDto = (historyFromChain) => {
     const history = _.map(historyFromChain, ownership => {
-        const { ownerId: owner, lastOwnerId: lastOwner, ownershipId, documents, transactions } = ownership;
-        return { owner: owner.name, lastOwner: lastOwner.name, ownershipId, documents, transactions }
+        const { owner, buyer, ownershipId, transactions, amount } = ownership;
+        const soldTx = _.find(transactions, tx => tx.status === ownershipStatusEnum.CLOSED);
+        let buyerName = '';
+        let ownerName = '';
+        if (owner) ownerName = owner.name;
+        if (buyer) buyerName = buyer.name;
+        let link = '';
+        if (soldTx) link = `https://mumbai.polygonscan.com/tx/${soldTx.hash}`;
+        return { owner: ownerName, buyer: buyerName, ownershipId, amount, link }
     });
 
     return history;
 }
 
 // TODO: discuss the findQuery for this
-const getOwnershipHistoryForProperty = async (userId, ownershipId) => {
+const getOwnershipHistoryForProperty = async (ownershipId) => {
     if(!ownershipId) return { success: false, error: 'ownershipId is required' };
 
-    const findQuery = { ownerId: userId, ownershipId };
-    const ownership = await ownershipModel.findOne(findQuery).populate('ownerId lastOwnerId');
+    const ownership = await ownershipModel.findOne({ ownershipId }).lean();
     const pixelHash = ownership.property.pixels[0].hash;
-    
-    const historyFromChain = await getOwnershipHistoryWithPixelHash(pixelHash);
-    const ownershipHistory = getOwnershipHistoryDto(historyFromChain.data);
+    const ownerships = await ownershipModel.aggregate([
+        { $addFields: { pixels: '$property.pixels' } },
+        { $unwind: { path: '$pixels' } },
+        { $match: { 'pixels.hash': pixelHash } },
+        { $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' } },
+        { $lookup: { from: 'users', localField: 'buyerId', foreignField: '_id', as: 'buyer' } }
+
+    ]);
+    const ownershipHistory = getOwnershipHistoryDto(ownerships);
 
     return { success: true, data: ownershipHistory };
 }

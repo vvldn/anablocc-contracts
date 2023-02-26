@@ -12,9 +12,8 @@ const getOwnershipDetails = async (req, res, next) => {
 
 const getOwnershipHistory = async (req, res, next) => {
     try {
-        const { id: userId } = req.user;
         const { ownershipId } = req.params;
-        const response = await ownershipService.getOwnershipHistoryForProperty(userId, ownershipId);
+        const response = await ownershipService.getOwnershipHistoryForProperty(ownershipId);
         return res.status(200).send(response);
     } catch(err) {
         console.error(err);

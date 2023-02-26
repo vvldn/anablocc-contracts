@@ -3,10 +3,10 @@ const { ownershipStatusEnum, documentsStatusEnum } = require('../enums');
 const ownershipModel = require('../models/ownershipModel');
 
 const initiateSale = async (ownershipId, data) => {
-    const { userId: ownerId, buyerId, transactionHash } = data;
+    const { buyerId, transactionHash } = data;
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
-        { ownerId, ownershipId },
+        { ownershipId },
         { $set: { 
             buyerId, 
             status: ownershipStatusEnum.SALE_INITIATED,
@@ -19,10 +19,10 @@ const initiateSale = async (ownershipId, data) => {
 }
 
 const acceptSale = async (ownershipId, data) => {
-    const { userId: buyerId, transactionHash } = data;
+    const { transactionHash } = data;
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
-        { buyerId, ownershipId },
+        { ownershipId },
         { $set: {
             status: ownershipStatusEnum.SALE_ACCEPTED,
             transactions: {
@@ -36,14 +36,14 @@ const acceptSale = async (ownershipId, data) => {
 }
 
 const uploadDocuments = async (ownershipId, data) => {
-    const { userId: buyerId, transactionHash, documents } = data;
+    const { transactionHash, documents } = data;
 
     // const documentsArr = _.map(documents, doc => ({
     //     ipfsAddress: doc.address,// or `${ifsBaseUrl}/${doc.address}`
     // }))
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
-        { buyerId, ownershipId },
+        { ownershipId },
         { $set: {
             documents,
             status: ownershipStatusEnum.DOC_UPLOADED,
@@ -96,10 +96,10 @@ const approveDocuments = async (ownershipId, data) => {
 }
 
 const initiatePayment = async (ownershipId, data) => {
-    const { userId: buyerId, transactionHash } = data;
+    const { transactionHash } = data;
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
-        { buyerId, ownershipId },
+        { ownershipId },
         { $set: {
             status: ownershipStatusEnum.TX_INITIATED,
             transactions: {
@@ -113,10 +113,10 @@ const initiatePayment = async (ownershipId, data) => {
 }
 
 const acknowledgePayment = async (ownershipId, data) => {
-    const { userId: ownerId, transactionHash } = data;
+    const { transactionHash } = data;
     
     const updatedOwnership = await ownershipModel.findOneAndUpdate(
-        { ownerId, ownershipId },
+        { ownershipId },
         { $set: {
             status: ownershipStatusEnum.TX_ACKNOWLEDGED,
             transactions: {

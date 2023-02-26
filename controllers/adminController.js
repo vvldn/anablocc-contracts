@@ -35,8 +35,7 @@ const adminLogout = (req, res, next) => {
 
 const getAllProperties = async (req, res, next) => {
     try {
-        const { status } = req.params;
-        const response = await ownershipService.getAllPropertiesForAdmin(status);
+        const response = await ownershipService.getAllPropertiesForAdmin();
 
         return res.status(200).json(response)
     } catch (err) {
@@ -47,9 +46,7 @@ const getAllProperties = async (req, res, next) => {
 
 const getAllActions = async (req, res, next) => {
     try {
-        const { status } = req.body;
-
-        const response = await ownershipService.getAllActionsForAdmin(status);
+        const response = await ownershipService.getAllActionsForAdmin();
 
         return res.status(200).json(response);
     } catch (err) {

@@ -15,10 +15,10 @@ router.get('/:userId', userController.getUserDetailsById);
 
 router.get('/aadhar/:aadhar', userController.getUserDetailsByAadhar);
 
-router.post('/properties', userAuthMiddleware, userController.getAllPropertiesForUser);
+router.get('/:userId/properties', userController.getAllPropertiesForUser);
 
-router.post('/actions', userAuthMiddleware, userController.getAllActionsForUser);
+router.get('/:userId/actions', userController.getAllActionsForUser);
 
-router.post('/wallet', userAuthMiddleware, userController.setWalletForUser);
+router.post('/:userId/wallet', userController.setWalletForUser);
 
 module.exports = router;

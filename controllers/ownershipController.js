@@ -23,9 +23,8 @@ const getOwnershipHistory = async (req, res, next) => {
 
 const registerTransaction = async (req, res, next) => {
     try {
-        const { id: userId } = req.user;
         const { ownershipId, action } = req.params;
-        const data = { userId, ...req.body};
+        const data = req.body;
         const ownership = await ownershipService.checkAndRegisterTransaction(ownershipId, action, data);
         return res.status(200).send({ ownership });
     } catch(err) {

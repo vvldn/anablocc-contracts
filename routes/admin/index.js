@@ -6,9 +6,9 @@ router.post('/login', adminController.adminLogin);
 
 router.post('/logout', adminController.adminLogout);
 
-router.get('/properties/:status', adminController.getAllProperties);
+router.get('/properties', adminController.getAllProperties);
 
-router.get('/actions/:status', adminController.getAllActions);
+router.get('/actions', adminController.getAllActions);
 
 // router.post('/add-property', adminController.addPropertyFromAdmin);
 
